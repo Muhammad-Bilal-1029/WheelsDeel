@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Car Marketplace</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body class="auth-page">
+    <main class="form-wrapper">
+        <div class="form-container">
+            <h2>Login to Your Account</h2>
+            <p id="error-msg" class="error-message" style="display: none;"></p>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="username_or_email">Username or Email</label>
+                    <input type="text" id="username_or_email" placeholder="Username or Email" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" placeholder="Password" required>
+                </div>
+                <button class="btn-submit" type="submit">Login</button>
+            </form>
+            <div class="form-footer">
+                <p>Don't have an account? <a href="signup.html">Sign Up here</a></p>
+                <p><a href="index.html">← Back to Marketplace</a></p>
+            </div>
+        </div>
+    </main>
+    <script src="../js/auth.js"></script>
+</body>
+</html>

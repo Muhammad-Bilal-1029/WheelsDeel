@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - WheelsDeal</title>
+    <!-- Humari select ki hui modern corporate theme stylesheet -->
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+    <!-- Professional Navbar Header matching the theme -->
+    <nav class="navbar">
+        <div class="brand">Wheels<span>Deal</span></div>
+        <div class="nav-links">
+            <a href="index.html">Home</a>
+        </div>
+    </nav>
+
+    <!-- Main Signup Form Layout Wrapper -->
+    <div class="form-wrapper">
+        <div class="form-container">
+            <h2>Create  Account</h2>
+            <p class="subtitle">Join the largest trusted automotive marketplace hub to buy and sell cars.</p>
+            
+            <!-- Error message feedback alert box linked with backend details -->
+            <div id="error-box" class="error-message" style="display: none;"></div>
+
+            <form id="signupForm">
+                <!-- Username Input Field -->
+                <div class="form-group">
+                    <label for="sign_username">Username</label>
+                    <input type="text" id="sign_username" minlength="3" maxlength="50" placeholder="Choose a  username" required>
+                </div>
+
+                <!-- Email Input Field -->
+                <div class="form-group">
+                    <label for="sign_email">Email Address</label>
+                    <input type="email" id="sign_email" placeholder="email@example.com" required>
+                </div>
+
+                <!-- Password Input Field -->
+                <div class="form-group">
+                    <label for="sign_password">Password</label>
+                    <input type="password" id="sign_password" minlength="8" maxlength="25" placeholder="Create strong  password" required>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="btn-submit">Register Account</button>
+            </form>
+
+            <!-- Navigation Footer -->
+            <div class="form-footer">
+                <p>Already have an account? <a href="login.html">Sign In </a></p>
+                <br>
+                <a href="index.html">← Back to Marketplace</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Core Authentication Frontend Script Connection -->
+    <script src="../js/auth.js"></script>
+</body>
+</html>
