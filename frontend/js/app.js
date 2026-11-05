@@ -18,13 +18,15 @@ function renderNavigation() {
     if (!nav) return;
 
     const links = [
-        createNavigationLink("index.html#home", "Home"),
-        createNavigationLink("services.html#services-list", "Our Services"),
-        createNavigationLink("contact.html#contact", "Contact"),
-        createNavigationLink("about.html#about", "About Us"),
-        createNavigationLink("careers.html#careers", "Careers"),
-        createNavigationLink("blogs.html#blogs", "Our Blogs"),
+        createNavigationLink("index.html#home", "Home", "nav-page-link"),
+        createNavigationLink("services.html#services-list", "Our Services", "nav-page-link"),
+        createNavigationLink("contact.html#contact", "Contact", "nav-page-link"),
+        createNavigationLink("analytics.html", "Analytics", "nav-page-link"),
     ];
+
+    const currentPage = window.location.pathname.split("/").pop() || "index.html";
+    const activeLink = links.find((link) => link.pathname.split("/").pop() === currentPage);
+    if (activeLink) activeLink.setAttribute("aria-current", "page");
 
     const token = localStorage.getItem("token");
     const username = localStorage.getItem("username");
@@ -37,7 +39,7 @@ function renderNavigation() {
             window.location.reload();
         });
         links.push(
-            createNavigationLink("sell.html", "Sell Car", "btn-nav"),
+            createNavigationLink("sell.html", "Sell Car", "btn-nav nav-page-link"),
             logout,
         );
 
@@ -49,7 +51,7 @@ function renderNavigation() {
         links.push(
             createNavigationLink("login.html", "Login"),
             createNavigationLink("signup.html", "Sign Up"),
-            createNavigationLink("sell.html", "Sell Car", "btn-nav"),
+            createNavigationLink("sell.html", "Sell Car", "btn-nav nav-page-link"),
         );
     }
 
@@ -127,6 +129,72 @@ async function loadMarketplaceCars(brandFilter = "") {
     }
 }
 
+function formatAnalyticsMetric(value) {
+    return value === null || value === undefined ? "Not tracked" : Number(value).toLocaleString();
+}
+
+async function loadAnalyticsDashboard() {
+    const dashboard = document.getElementById("analytics-dashboard");
+    if (!dashboard) return;
+
+    const status = document.getElementById("analytics-status");
+    const availableCars = document.getElementById("analytics-available-cars");
+    const totalListings = document.getElementById("analytics-total-listings");
+    const carTableBody = document.getElementById("analytics-cars-list");
+
+    try {
+        const [analyticsResponse, carsResponse] = await Promise.all([
+            fetch(`${BACKEND_API_URL}/analytics`),
+            fetch(`${BACKEND_API_URL}/cars`),
+        ]);
+        if (!analyticsResponse.ok || !carsResponse.ok) {
+            throw new Error("Analytics data request failed.");
+        }
+
+        const analytics = await analyticsResponse.json();
+        const cars = await carsResponse.json();
+        if (!Array.isArray(cars) || typeof analytics.total_listings !== "number") {
+            throw new Error("The server returned invalid analytics data.");
+        }
+
+        totalListings.textContent = formatAnalyticsMetric(analytics.total_listings);
+        availableCars.textContent = formatAnalyticsMetric(analytics.available_cars);
+        document.getElementById("analytics-pending-cars").textContent = formatAnalyticsMetric(analytics.pending_cars);
+        document.getElementById("analytics-sold-cars").textContent = formatAnalyticsMetric(analytics.sold_cars);
+
+        if (cars.length === 0) {
+            const row = document.createElement("tr");
+            const cell = document.createElement("td");
+            cell.colSpan = 4;
+            cell.textContent = "No vehicle listings yet.";
+            row.append(cell);
+            carTableBody.replaceChildren(row);
+        } else {
+            carTableBody.replaceChildren(...cars.map((car) => {
+                const row = document.createElement("tr");
+                [ `${car.brand} ${car.model}`, car.year, `PKR ${Number(car.price).toLocaleString()}`, "Available" ]
+                    .forEach((value) => {
+                        const cell = document.createElement("td");
+                        cell.textContent = value;
+                        row.append(cell);
+                    });
+                return row;
+            }));
+        }
+        status.textContent = "Live listing data loaded.";
+        status.classList.remove("analytics-status-error");
+    } catch (error) {
+        console.error("Analytics loader failure:", error);
+        status.textContent = "Could not load live analytics. Check that the backend server is running.";
+        status.classList.add("analytics-status-error");
+        totalListings.textContent = "—";
+        availableCars.textContent = "—";
+        document.getElementById("analytics-pending-cars").textContent = "—";
+        document.getElementById("analytics-sold-cars").textContent = "—";
+        carTableBody.replaceChildren();
+    }
+}
+
 function filterCars() {
     const searchInput = document.getElementById("search-brand");
     loadMarketplaceCars(searchInput ? searchInput.value.trim() : "");
@@ -188,6 +256,7 @@ if (sellForm) {
 document.addEventListener("DOMContentLoaded", () => {
     renderNavigation();
     loadMarketplaceCars();
+    loadAnalyticsDashboard();
 
 
     const quoteForm = document.getElementById("quoteForm");

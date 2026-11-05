@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="View WheelDeal marketplace and blog analytics.">
+    <title>Analytics - WheelDeal</title>
+    <link rel="stylesheet" href="../css/style.css?v=5">
+</head>
+<body>
+    <nav class="navbar">
+        <a class="brand" href="index.html">Wheels<span>Deal</span></a>
+        <div class="nav-links" id="nav-links-container"></div>
+    </nav>
+
+    <main id="analytics-dashboard">
+        <section class="services-hero analytics-hero" aria-labelledby="analytics-title">
+            <div class="services-hero-content">
+                <p class="section-eyebrow">WHEELDEAL OVERVIEW</p>
+                <h1 id="analytics-title">Marketplace &amp; blog analytics.</h1>
+                <p>See current vehicle listings and a snapshot of the WheelDeal marketplace.</p>
+                <div class="services-hero-actions">
+                    <a class="btn-nav" href="#marketplace-heading">Explore analytics</a>
+                    <a class="btn-outline" href="index.html#available-vehicles">Browse available cars</a>
+                </div>
+            </div>
+            <a class="scroll-cue" href="#marketplace-heading">Explore marketplace insights <span aria-hidden="true">↓</span></a>
+        </section>
+
+        <div class="analytics-page">
+            <p class="analytics-status" id="analytics-status" role="status" aria-live="polite">Loading live listing data...</p>
+
+        <section class="analytics-section" aria-labelledby="marketplace-heading">
+            <div class="analytics-section-heading">
+                <div>
+                    <p class="section-eyebrow">MARKETPLACE</p>
+                    <h2 id="marketplace-heading">Vehicle overview</h2>
+                </div>
+                <a class="home-section-link" href="index.html#available-vehicles">Browse listings <span aria-hidden="true">→</span></a>
+            </div>
+            <div class="analytics-grid">
+                <article class="analytics-card">
+                    <span class="analytics-card-label">Total listings</span>
+                    <strong id="analytics-total-listings">—</strong>
+                    <span class="analytics-card-note">All vehicles in the marketplace</span>
+                </article>
+                <article class="analytics-card">
+                    <span class="analytics-card-label">Available cars</span>
+                    <strong id="analytics-available-cars">—</strong>
+                    <span class="analytics-card-note">Currently listed for buyers</span>
+                </article>
+                <article class="analytics-card">
+                    <span class="analytics-card-label">Pending cars</span>
+                    <strong id="analytics-pending-cars">—</strong>
+                    <span class="analytics-card-note">Status tracking is not enabled</span>
+                </article>
+                <article class="analytics-card">
+                    <span class="analytics-card-label">Cars sold</span>
+                    <strong id="analytics-sold-cars">—</strong>
+                    <span class="analytics-card-note">Sales are not recorded yet</span>
+                </article>
+            </div>
+            <div class="analytics-grid analytics-grid-secondary">
+                <article class="analytics-card">
+                    <span class="analytics-card-label">Trust rating</span>
+                    <strong class="analytics-untracked">Not rated</strong>
+                    <span class="analytics-card-note">Customer reviews are not collected yet</span>
+                </article>
+                <article class="analytics-card">
+                    <span class="analytics-card-label">Customer satisfaction</span>
+                    <strong class="analytics-untracked">Not rated</strong>
+                    <span class="analytics-card-note">Satisfaction surveys are not collected yet</span>
+                </article>
+            </div>
+        </section>
+
+        <section class="analytics-section" aria-labelledby="inventory-heading">
+            <div class="analytics-section-heading">
+                <div>
+                    <p class="section-eyebrow">LIVE DATA</p>
+                    <h2 id="inventory-heading">Current vehicle listings</h2>
+                </div>
+            </div>
+            <div class="analytics-table-wrap">
+                <table class="analytics-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Vehicle</th>
+                            <th scope="col">Year</th>
+                            <th scope="col">Price</th>
+                            <th scope="col">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="analytics-cars-list">
+                        <tr><td colspan="4">Loading listings...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="analytics-section" aria-labelledby="blog-analytics-heading">
+            <div class="analytics-section-heading">
+                <div>
+                    <p class="section-eyebrow">CONTENT</p>
+                    <h2 id="blog-analytics-heading">Blog overview</h2>
+                </div>
+                <a class="home-section-link" href="blogs.html#latest-articles">Visit the blog <span aria-hidden="true">→</span></a>
+            </div>
+            <div class="analytics-grid analytics-grid-secondary">
+                <article class="analytics-card">
+                    <span class="analytics-card-label">Published articles</span>
+                    <strong>3</strong>
+                    <span class="analytics-card-note">Buying, inspection, and selling guides</span>
+                </article>
+                <article class="analytics-card">
+                    <span class="analytics-card-label">Article views</span>
+                    <strong class="analytics-untracked">Not tracked</strong>
+                    <span class="analytics-card-note">Page-view analytics are not enabled</span>
+                </article>
+            </div>
+            <p class="analytics-disclaimer">Pending and sold counts, ratings, and blog views will appear when the site starts recording those events.</p>
+        </section>
+        </div>
+    </main>
+
+    <script src="../js/app.js"></script>
+</body>
+</html>

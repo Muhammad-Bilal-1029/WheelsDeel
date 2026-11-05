@@ -112,6 +112,17 @@ def get_cars(brand: Optional[str] = None, db: Session = Depends(database.get_db)
     return query.order_by(models.Car.id.desc()).all()
 
 
+@app.get("/api/analytics")
+def get_analytics(db: Session = Depends(database.get_db)):
+    total_listings = db.query(models.Car).count()
+    return {
+        "total_listings": total_listings,
+        "available_cars": total_listings,
+        "pending_cars": None,
+        "sold_cars": None,
+    }
+
+
 # --- FRONTEND (same server se serve hoga) ---
 # Yeh sab API routes ke BAAD aana chahiye, warna /api/* ko overshadow kar dega.
 

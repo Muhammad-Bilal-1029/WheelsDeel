@@ -4,7 +4,7 @@
 
 :root {
     --primary-color: #1e3a8a;       /* Deep Navy Blue - Professionalism aur Trust ke liye */
-    --secondary-color: #2563eb;     /* Bright Blue - Action buttons aur links k liye */
+    --secondary-color: hsl(221, 85%, 59%);     /* Bright Blue - Action buttons aur links k liye */
     --primary-hover: #1d4ed8;       /* Hover effect Blue */
     --accent-color: #16a34a;        /* Success Green - Price tags aur active labels */
     --danger-color: #dc2626;        /* Corporate Red - Error handling */
@@ -51,6 +51,7 @@ a:hover {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 1.5rem 2rem;
     position: sticky;
     top: 0;
     z-index: 1000;
@@ -58,11 +59,12 @@ a:hover {
 }
 
 .navbar .brand {
-    font-size: 1.6rem;
-    font-weight: 800;
+    flex-shrink: 0;
+    font-size: 1.45rem;
+    font-weight: 750;
     color: var(--primary-color);
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.025em;
 }
 
 .navbar .brand span {
@@ -71,14 +73,17 @@ a:hover {
 
 .nav-links {
     display: flex;
-    gap: 2rem;
+    flex: 1 1 900px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 0.75rem clamp(1.8rem, 1.6vw, 1.6rem);
     align-items: center;
 }
 
 .nav-links a {
     color: var(--text-main);
-    font-weight: 600;
-    font-size: 0.95rem;
+    font-weight: 700;
+    font-size: 1.29rem;
     transition: color 0.2s;
 }
 
@@ -88,15 +93,15 @@ a:hover {
 }
 
 .nav-links .btn-nav {
-    background-color: var(--secondary-color);
-    color: white;
-    padding: 0.5rem 1.2rem;
-    border-radius: var(--radius);
+    background: transparent;
+    color: var(--text-main);
+    padding: 0;
+    border-radius: 0;
 }
 
 .nav-links .btn-nav:hover {
-    background-color: var(--primary-hover);
-    color: white;
+    background: transparent;
+    color: var(--secondary-color);
 }
 
 .nav-links .nav-welcome {
@@ -533,6 +538,12 @@ a:hover {
 .civic-hero::before {
     background-image: url("https://images.unsplash.com/photo-1742230376664-ce990c7d7bb9?auto=format&fit=crop&w=2200&q=85");
     background-position: center 58%;
+}
+
+.analytics-hero::before {
+    background-image: url("https://images.unsplash.com/photo-1502877338535-766e1452684a?auto=format&fit=crop&w=2200&q=85");
+    background-position: center 58%;
+    filter: hue-rotate(24deg) saturate(1.2);
 }
 
 .services-hero::after {
@@ -1105,6 +1116,17 @@ a:hover {
     }
 }
 
+@media (min-width: 901px) and (max-width: 1150px) {
+    .navbar {
+        justify-content: center;
+    }
+
+    .nav-links {
+        flex-basis: 100%;
+        justify-content: center;
+    }
+}
+
 @media (max-width: 768px) {
     .search-section {
         flex-direction: column;
@@ -1160,7 +1182,186 @@ a:hover {
 
 @media (prefers-reduced-motion: reduce) {
     .services-hero::before,
-    .home-hero::before {
+    .home-hero::before,
+    .analytics-hero::before {
         animation: none;
+    }
+}
+
+.nav-links a.nav-page-link {
+    position: relative;
+    padding-block: 0.35rem;
+}
+
+.nav-links a.nav-page-link::after {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: 2px;
+    background: var(--secondary-color);
+    content: "";
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.2s ease;
+}
+
+.nav-links a.nav-page-link[aria-current="page"] {
+    color: var(--primary-color);
+}
+
+.nav-links a.nav-page-link[aria-current="page"]::after {
+    transform: scaleX(1);
+}
+
+.analytics-page {
+    width: min(1120px, calc(100% - 3rem));
+    margin: 0 auto;
+    padding: 4rem 0 5rem;
+}
+
+.analytics-page > .analytics-status {
+    margin-bottom: 1.5rem;
+    margin-top: 1rem;
+    color: var(--accent-color);
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
+.analytics-page > .analytics-status-error {
+    color: var(--danger-color);
+}
+
+.analytics-section {
+    margin-top: 2.75rem;
+}
+
+.analytics-section-heading {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+}
+
+.analytics-section-heading h2 {
+    color: var(--primary-color);
+    font-size: clamp(1.35rem, 2.5vw, 1.65rem);
+    font-weight: 900;
+    letter-spacing: -0.025em;
+}
+
+.analytics-section-heading .home-section-link {
+    margin: 0 0 0.35rem;
+}
+
+.analytics-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.analytics-grid-secondary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin-top: 1rem;
+}
+
+.analytics-card {
+    display: flex;
+    min-height: 145px;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 1.25rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    background: var(--card-bg);
+    box-shadow: var(--shadow-sm);
+}
+
+.analytics-card-label {
+    color: var(--text-muted);
+    font-size: 0.92rem;
+    font-weight: 700;
+}
+
+.analytics-card strong {
+    margin: 0.35rem 0;
+    color: var(--primary-color);
+    font-size: clamp(1.65rem, 3vw, 2rem);
+    font-weight: 900;
+    letter-spacing: -0.025em;
+    line-height: 1.15;
+}
+
+.analytics-card strong.analytics-untracked {
+    font-size: 1.15rem;
+}
+
+.analytics-card-note,
+.analytics-disclaimer {
+    color: var(--text-muted);
+    font-size: 0.82rem;
+}
+
+.analytics-table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    background: var(--card-bg);
+    box-shadow: var(--shadow-sm);
+}
+
+.analytics-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.analytics-table th,
+.analytics-table td {
+    padding: 0.9rem 1rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.analytics-table th {
+    background: #f8fafc;
+    color: var(--primary-color);
+    font-size: 0.82rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.analytics-table td {
+    color: var(--text-muted);
+}
+
+.analytics-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.analytics-disclaimer {
+    margin-top: 1rem;
+}
+
+@media (max-width: 768px) {
+    .analytics-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .analytics-page {
+        width: min(100% - 2rem, 1120px);
+        padding-top: 2.75rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .analytics-grid,
+    .analytics-grid-secondary {
+        grid-template-columns: 1fr;
+    }
+
+    .analytics-section-heading {
+        align-items: flex-start;
+        flex-direction: column;
     }
 }

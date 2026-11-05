@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Post An Ad - Car Marketplace</title>
     <!-- Humari select ki hui design theme stylesheet -->
-    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/style.css?v=5">
 </head>
 <body>
 
@@ -68,9 +68,7 @@
         </div>
     </div>
 
-    <!-- Security Check Inline Script for Quick Redirection -->
     <script>
-        // HCI Rule: Page load hotay hi security check lagana taaki unauthorized access na ho
         document.addEventListener("DOMContentLoaded", () => {
             const token = localStorage.getItem("token");
             if (!token) {
@@ -90,7 +88,6 @@
         }
     </script>
     
-    <!-- Core Application Frontend API Integration file -->
     <script src="../js/app.js"></script>
 </body>
 </html>
