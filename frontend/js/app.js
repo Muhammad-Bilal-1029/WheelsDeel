@@ -1,9 +1,59 @@
 // ==========================================================================
 // CENTRAL CONFIGURATION & LAYER INTEGRATION
 // ==========================================================================
+// Frontend aur backend aik hi server se serve hotay hain, is liye relative "/api" use hota hai.
+// Fallback: file:// ya VS Code Live Server se kholo to local backend use hoga
+// (us surat mai backend ki .env mai CORS_ORIGINS=http://127.0.0.1:5500 jaisa set karna zaroori hai).
 const BACKEND_API_URL = (window.location.protocol === "file:" || window.location.port === "5500" || window.location.port === "5501")
     ? "http://127.0.0.1:8000/api"
     : "/api";
+
+// POST requests par server yeh header check karta hai (CSRF se bachao)
+const CSRF_HEADERS = { "X-Requested-With": "WheelDeal" };
+
+// Login ab HttpOnly cookie se hota hai (JavaScript usay padh nahi sakti).
+// Purane version ka token localStorage mai reh gaya ho to hata do.
+try {
+    localStorage.removeItem("token");
+    localStorage.removeItem("username");
+} catch (error) { /* storage blocked ho to koi masla nahi */ }
+
+function extractErrorMessage(data, fallback) {
+    if (data && typeof data.detail === "string") return data.detail;
+    if (data && Array.isArray(data.detail) && data.detail.length > 0) {
+        return data.detail
+            .map((item) => {
+                const field = Array.isArray(item.loc) ? item.loc[item.loc.length - 1] : "";
+                const message = String(item.msg || "").replace(/^Value error, /, "");
+                return field ? `${field}: ${message}` : message;
+            })
+            .join(" | ");
+    }
+    return fallback;
+}
+
+async function fetchCurrentUser() {
+    try {
+        const response = await fetch(`${BACKEND_API_URL}/me`, { credentials: "include", cache: "no-store" });
+        if (!response.ok) return null;
+        return await response.json();
+    } catch (error) {
+        return null;
+    }
+}
+
+async function logoutUser() {
+    try {
+        await fetch(`${BACKEND_API_URL}/logout`, {
+            method: "POST",
+            credentials: "include",
+            headers: CSRF_HEADERS,
+        });
+    } catch (error) {
+        console.error("Logout request failed:", error);
+    }
+    window.location.href = "login.html";
+}
 
 function createNavigationLink(href, text, className = "") {
     const anchor = document.createElement("a");
@@ -13,11 +63,12 @@ function createNavigationLink(href, text, className = "") {
     return anchor;
 }
 
-function renderNavigation() {
+function buildNavigation(user) {
     const nav = document.getElementById("nav-links-container");
     if (!nav) return;
 
-    const links = [
+    // Login se pehle sirf Login / Sign Up dikhte hain; baqi pages login ke baad
+    const links = !user ? [] : [
         createNavigationLink("index.html#home", "Home", "nav-page-link"),
         createNavigationLink("services.html#services-list", "Our Services", "nav-page-link"),
         createNavigationLink("contact.html#contact", "Contact", "nav-page-link"),
@@ -28,15 +79,11 @@ function renderNavigation() {
     const activeLink = links.find((link) => link.pathname.split("/").pop() === currentPage);
     if (activeLink) activeLink.setAttribute("aria-current", "page");
 
-    const token = localStorage.getItem("token");
-    const username = localStorage.getItem("username");
-    if (token && username) {
+    if (user) {
         const logout = createNavigationLink("#", "Logout");
         logout.addEventListener("click", (event) => {
             event.preventDefault();
-            localStorage.removeItem("token");
-            localStorage.removeItem("username");
-            window.location.reload();
+            logoutUser();
         });
         links.push(
             createNavigationLink("sell.html", "Sell Car", "btn-nav nav-page-link"),
@@ -45,17 +92,23 @@ function renderNavigation() {
 
         const welcome = document.createElement("span");
         welcome.className = "nav-welcome";
-        welcome.textContent = `Welcome, ${username}!`;
+        welcome.textContent = `Welcome, ${user.username}!`;
         links.push(welcome);
     } else {
         links.push(
             createNavigationLink("login.html", "Login"),
             createNavigationLink("signup.html", "Sign Up"),
-            createNavigationLink("sell.html", "Sell Car", "btn-nav nav-page-link"),
         );
     }
 
     nav.replaceChildren(...links);
+}
+
+async function renderNavigation() {
+    buildNavigation(null);                       // foran logged-out nav dikhao
+    const user = await fetchCurrentUser();       // phir server se pooch kar update karo
+    if (user) buildNavigation(user);
+    return user;
 }
 
 function showMarketplaceMessage(container, message, isError = false) {
@@ -108,7 +161,11 @@ async function loadMarketplaceCars(brandFilter = "") {
         const targetUrl = new URL(`${BACKEND_API_URL}/cars`, window.location.href);
         if (brandFilter) targetUrl.searchParams.set("brand", brandFilter);
 
-        const response = await fetch(targetUrl);
+        const response = await fetch(targetUrl, { credentials: "include" });
+        if (response.status === 401) {
+            window.location.replace("login.html");
+            return;
+        }
         if (!response.ok) {
             throw new Error(`Car listings request failed (${response.status}).`);
         }
@@ -144,9 +201,13 @@ async function loadAnalyticsDashboard() {
 
     try {
         const [analyticsResponse, carsResponse] = await Promise.all([
-            fetch(`${BACKEND_API_URL}/analytics`),
-            fetch(`${BACKEND_API_URL}/cars`),
+            fetch(`${BACKEND_API_URL}/analytics`, { credentials: "include" }),
+            fetch(`${BACKEND_API_URL}/cars`, { credentials: "include" }),
         ]);
+        if (analyticsResponse.status === 401 || carsResponse.status === 401) {
+            window.location.replace("login.html");
+            return;
+        }
         if (!analyticsResponse.ok || !carsResponse.ok) {
             throw new Error("Analytics data request failed.");
         }
@@ -209,13 +270,6 @@ if (sellForm) {
         errorBox.textContent = "";
         errorBox.style.display = "none";
 
-        const token = localStorage.getItem("token");
-        if (!token) {
-            alert("Session invalid. Please log in first to create vehicle ads.");
-            window.location.href = "login.html";
-            return;
-        }
-
         const carData = {
             brand: document.getElementById("brand").value.trim(),
             model: document.getElementById("model").value.trim(),
@@ -227,21 +281,23 @@ if (sellForm) {
         try {
             const response = await fetch(`${BACKEND_API_URL}/cars`, {
                 method: "POST",
+                credentials: "include",
                 headers: {
                     "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`
+                    ...CSRF_HEADERS,
                 },
                 body: JSON.stringify(carData)
             });
-            const data = await response.json();
+            const data = await response.json().catch(() => ({}));
 
             if (response.ok) {
                 alert("Success! Your car advertisement has been published.");
                 window.location.href = "index.html";
+            } else if (response.status === 401) {
+                alert("Session expired. Please log in again to create vehicle ads.");
+                window.location.href = "login.html";
             } else {
-                errorBox.textContent = typeof data.detail === "string"
-                    ? data.detail
-                    : "Validation error. Check the submitted details.";
+                errorBox.textContent = extractErrorMessage(data, "Could not publish the ad. Check the submitted details.");
                 errorBox.style.display = "block";
             }
         } catch (error) {
@@ -253,11 +309,20 @@ if (sellForm) {
 }
 
 // Global DOM Content Loaded Trigger
-document.addEventListener("DOMContentLoaded", () => {
-    renderNavigation();
+document.addEventListener("DOMContentLoaded", async () => {
+    const user = await renderNavigation();
+
+    // Har page login ke baad hi dikhta hay (asli rok server par hay, yeh sirf user ko login page par bhejta hay)
+    if (!user) {
+        window.location.replace("login.html");
+        return;
+    }
+
     loadMarketplaceCars();
     loadAnalyticsDashboard();
 
+    const logoutBtn = document.getElementById("logoutBtn");
+    if (logoutBtn) logoutBtn.style.display = "inline-block";
 
     const quoteForm = document.getElementById("quoteForm");
     if (quoteForm) {
