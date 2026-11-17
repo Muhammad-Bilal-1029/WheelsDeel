@@ -10,3 +10,5 @@ python-dotenv==1.2.4
 # MySQL driver (SQLite ke liye bhi install rehne do, koi nuqsan nahi)
 pymysql==1.2.3
 cryptography==50.0.2
+# Car photos: upload verify, resize, thumbnails
+pillow==13.0.0

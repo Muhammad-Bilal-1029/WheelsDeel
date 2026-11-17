@@ -6,12 +6,13 @@
     <title>Sign Up - WheelsDeal</title>
     <!-- Humari select ki hui modern corporate theme stylesheet -->
     <link rel="stylesheet" href="../css/style.css?v=5">
+    <link rel="stylesheet" href="../css/overrides.css?v=1">
 </head>
 <body>
 
     <!-- Professional Navbar Header matching the theme -->
     <nav class="navbar">
-        <div class="brand">Wheels<span>Deal</span></div>
+        <div class="brand"><img class="brand-logo" src="../images/wheeldeal-logo.png" alt="WheelDeal"></div>
         <div class="nav-links">
             <a href="login.html">Login</a>
         </div>
@@ -30,7 +31,7 @@
                 <!-- Username Input Field -->
                 <div class="form-group">
                     <label for="sign_username">Username</label>
-                    <input type="text" id="sign_username" minlength="3" maxlength="50" pattern="[A-Za-z0-9_.\-]+" title="English letters, numbers, dot, dash and underscore only" placeholder="Choose a  username" required>
+                    <input type="text" id="sign_username" minlength="6" maxlength="50" pattern="[A-Za-z0-9_.\-]+" title="English letters, numbers, dot, dash and underscore only" placeholder="Choose a  username" required>
                 </div>
 
                 <!-- Email Input Field -->
@@ -42,7 +43,7 @@
                 <!-- Password Input Field -->
                 <div class="form-group">
                     <label for="sign_password">Password</label>
-                    <input type="password" id="sign_password" minlength="8" maxlength="25" placeholder="Create strong  password" required>
+                    <input type="password" id="sign_password" minlength="8" maxlength="50" placeholder="Create strong  password" required>
                 </div>
 
                 <!-- Submit Button -->

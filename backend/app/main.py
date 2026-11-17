@@ -2,6 +2,7 @@ import logging
 import posixpath
 from contextlib import asynccontextmanager
 from typing import Optional
+from urllib.parse import unquote
 
 import jwt
 from fastapi import (
@@ -10,13 +11,13 @@ from fastapi import (
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
-from sqlalchemy import or_, text
+from sqlalchemy import func, or_, text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from starlette.concurrency import run_in_threadpool
 
-from . import auth_utils, config, database, mailer, migrate, models, ratelimit, schemas
-from .utils import normalize_username
+from . import admin, auth_utils, cars, config, database, mailer, migrate, models, ratelimit, schemas
+from .utils import normalize_username, utcnow
 
 logger = logging.getLogger("uvicorn.error")
 
@@ -37,14 +38,13 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=config.CORS_ORIGINS,
     allow_credentials=config.CORS_ALLOW_CREDENTIALS,
-    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_methods=["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["Content-Type", "X-Requested-With"],
 )
 
 
 def _public_base_url(request: Request) -> str:
     return config.PUBLIC_BASE_URL or str(request.base_url).rstrip("/")
-
 
 def _verification_link(request: Request, user: models.User) -> str:
     token = auth_utils.create_email_token(user)
@@ -202,7 +202,13 @@ def login(
         ratelimit.record(db, "login_fail_acct", account_key)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Access Denied! Credentials are not valid. Please sign up if you don't have an account.",
+            detail="Try Again! Username/Emails or Password are not valid. Please sign up if you don't have an account.",
+        )
+
+    if db_user.is_banned:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="This account has been suspended. Please contact the site administrators.",
         )
 
     if config.REQUIRE_EMAIL_VERIFICATION and not db_user.email_verified:
@@ -234,49 +240,76 @@ def logout(request: Request, response: Response, db: Session = Depends(database.
 @app.get("/api/me")
 def me(response: Response, user: models.User = Depends(auth_utils.get_current_user)):
     response.headers["Cache-Control"] = "no-store"
-    return {"id": user.id, "username": user.username, "email_verified": user.email_verified}
+    return {
+        "id": user.id,
+        "username": user.username,
+        "email_verified": user.email_verified,
+        "is_admin": user.is_admin,
+    }
 
 
 # --- CAR ROUTES ---
+# List / detail / create / edit / delete / My Ads / photos: cars.py mai hain.
+# Yahan sirf report aur status ke endpoints hain.
 
-@app.post("/api/cars", response_model=schemas.CarResponse)
-def add_car(
-    car: schemas.CarCreate,
+@app.post("/api/cars/{car_id}/report")
+def report_car(
+    car_id: int,
+    body: schemas.ReportCreate,
     db: Session = Depends(database.get_db),
     user: models.User = Depends(auth_utils.get_current_user),
 ):
-    # Yeh route sirf tab chalega jab valid login session (cookie) hoga
     if config.REQUIRE_EMAIL_VERIFICATION and not user.email_verified:
-        raise HTTPException(status_code=403, detail="Please verify your email before posting ads.")
+        raise HTTPException(status_code=403, detail="Please verify your email before reporting ads.")
 
-    if db.query(models.Car).filter(models.Car.owner_id == user.id).count() >= config.MAX_ADS_PER_USER:
-        raise HTTPException(status_code=403, detail="You have reached the maximum number of ads allowed.")
+    car = db.get(models.Car, car_id)
+    if car is None or car.is_hidden or car.is_deleted:
+        raise HTTPException(status_code=404, detail="Ad not found.")
+    if car.owner_id == user.id:
+        raise HTTPException(status_code=400, detail="You cannot report your own ad.")
 
-    key = str(user.id)
-    hour_limit, day_limit = (config.MAX_ADS_PER_HOUR, 3600), (config.MAX_ADS_PER_DAY, 86400)
-    ratelimit.check(db, "ad_hour", key, *hour_limit)
-    ratelimit.check(db, "ad_day", key, *day_limit)
+    ratelimit.check(db, "report_user", str(user.id), *config.REPORT_LIMIT_PER_USER)
 
-    db_car = models.Car(**car.model_dump(), owner_id=user.id)
-    db.add(db_car)
-    db.commit()
-    db.refresh(db_car)
+    already = db.query(models.AdReport.id).filter(
+        models.AdReport.car_id == car.id, models.AdReport.reporter_id == user.id
+    ).first()
+    if already:
+        raise HTTPException(status_code=409, detail="You have already reported this ad.")
 
-    ratelimit.record(db, "ad_hour", key)
-    ratelimit.record(db, "ad_day", key)
-    return db_car
+    db.add(models.AdReport(
+        car_id=car.id, reporter_id=user.id, reason=body.reason, details=body.details,
+        status="open", created_at=utcnow(),
+    ))
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(status_code=409, detail="You have already reported this ad.")
+
+    ratelimit.record(db, "report_user", str(user.id))
+    return {"msg": "Thank you! Your report was sent to the moderators."}
 
 
-@app.get("/api/cars", response_model=list[schemas.CarResponse])
-def get_cars(
-    brand: Optional[str] = None,
+@app.patch("/api/cars/{car_id}/status", response_model=schemas.CarResponse)
+def update_car_status(
+    car_id: int,
+    body: schemas.CarStatusUpdate,
     db: Session = Depends(database.get_db),
-    _user: models.User = Depends(auth_utils.get_current_user),   # login zaroori
+    user: models.User = Depends(auth_utils.get_current_user),
 ):
-    query = db.query(models.Car)
-    if brand:
-        query = query.filter(models.Car.brand.ilike(f"%{brand}%"))
-    return query.order_by(models.Car.id.desc()).all()
+    car = db.get(models.Car, car_id)
+    if car is None or car.is_deleted:
+        raise HTTPException(status_code=404, detail="Car not found.")
+    if car.is_hidden:
+        raise HTTPException(status_code=403, detail="This ad was removed by the moderators.")
+    # Sirf ad ka maalik apni ad ka status badal sakta hay
+    if car.owner_id != user.id:
+        raise HTTPException(status_code=403, detail="You can only change the status of your own ads.")
+
+    car.status = body.status
+    db.commit()
+    db.refresh(car)
+    return car
 
 
 @app.get("/api/analytics")
@@ -284,12 +317,19 @@ def get_analytics(
     db: Session = Depends(database.get_db),
     _user: models.User = Depends(auth_utils.get_current_user),   # login zaroori
 ):
-    total_listings = db.query(models.Car).count()
+    # Asli counts: status ke hisab se group kar ke
+    rows = (
+        db.query(models.Car.status, func.count(models.Car.id))
+        .filter(models.Car.is_hidden.is_(False), models.Car.is_deleted.is_(False))
+        .group_by(models.Car.status)
+        .all()
+    )
+    counts = {status_name: count for status_name, count in rows}
     return {
-        "total_listings": total_listings,
-        "available_cars": total_listings,
-        "pending_cars": None,
-        "sold_cars": None,
+        "total_listings": sum(counts.values()),
+        "available_cars": counts.get("available", 0),
+        "pending_cars": counts.get("pending", 0),
+        "sold_cars": counts.get("sold", 0),
     }
 
 
@@ -300,23 +340,29 @@ PUBLIC_EXACT_PATHS = {
     "/", "/carhtml/login.html", "/carhtml/signup.html",
     "/docs", "/redoc", "/openapi.json", "/docs/oauth2-redirect",
 }
-PUBLIC_PREFIXES = ("/api/", "/css/", "/js/")   # /api/* ko apni dependencies protect karti hain
+PUBLIC_PREFIXES = ("/api/", "/css/", "/js/","/images/")   # /api/* ko apni dependencies protect karti hain
 
 
 def _is_public_path(raw_path: str) -> bool:
     # Windows par \ bhi path separator hay aur "INDEX.HTML" / "index.html." bhi wohi file hoti hay,
     # is liye path ko normalize karte hain taake tricks se gate bypass na ho.
-    path = posixpath.normpath(raw_path.replace("\\", "/")).lower().rstrip(". ")
+    path = _normalize_path(raw_path)
     if not path.startswith("/"):
         return False
     return path in PUBLIC_EXACT_PATHS or path.startswith(PUBLIC_PREFIXES)
 
 
-def _has_valid_session(request: Request) -> bool:
+def _normalize_path(raw_path: str) -> str:
+    return posixpath.normpath(unquote(raw_path).replace("\\", "/")).lower().rstrip(". ")
+
+
+def _session_info(request: Request) -> Optional[bool]:
+    """Valid session ho to user ka is_admin (True/False), warna None."""
     if not request.cookies.get(auth_utils.COOKIE_NAME):
-        return False
+        return None
     with database.SessionLocal() as db:
-        return auth_utils.get_user_from_request(request, db) is not None
+        user = auth_utils.get_user_from_request(request, db)
+        return None if user is None else bool(user.is_admin)
 
 
 @app.middleware("http")
@@ -324,17 +370,29 @@ async def require_login_for_pages(request: Request, call_next):
     if _is_public_path(request.url.path):
         return await call_next(request)
 
-    if not await run_in_threadpool(_has_valid_session, request):
+    is_admin = await run_in_threadpool(_session_info, request)
+    if is_admin is None:
         return RedirectResponse(url="/carhtml/login.html", status_code=302, headers={"Cache-Control": "no-store"})
 
+    # admin.html sirf admin ko (asli rok /api/admin/* par hay; yeh non-admin ko khali page dikhne se bachata hay)
+    if not is_admin and _normalize_path(request.url.path).rsplit("/", 1)[-1] == "admin.html":
+        return RedirectResponse(url="/carhtml/index.html", status_code=302, headers={"Cache-Control": "no-store"})
+
     response = await call_next(request)
-    # Logout ke baad Back button se purana page cache se na khule
-    response.headers["Cache-Control"] = "no-store"
+    if _normalize_path(request.url.path).startswith("/media/"):
+        # Photos ke naam random aur kabhi nahi badalte: browser unhe cache kar sakta hay (sirf is user ke liye)
+        response.headers["Cache-Control"] = "private, max-age=86400"
+    else:
+        # Logout ke baad Back button se purana page cache se na khule
+        response.headers["Cache-Control"] = "no-store"
     return response
 
 
 # --- FRONTEND (same server se serve hoga) ---
 # Yeh sab API routes ke BAAD aana chahiye, warna /api/* ko overshadow kar dega.
+
+app.include_router(admin.router)
+app.include_router(cars.router)
 
 @app.get("/", include_in_schema=False)
 def root():
@@ -342,4 +400,7 @@ def root():
 
 
 if config.FRONTEND_DIR.exists():
+    # Photos (login ke baad hi milti hain: middleware /media/ ko bhi gate karta hay)
+    app.mount("/media", StaticFiles(directory=config.UPLOAD_ROOT), name="media")
+    app.mount("/carhtml", StaticFiles(directory=config.FRONTEND_DIR / "HTML"), name="frontend_html")
     app.mount("/", StaticFiles(directory=config.FRONTEND_DIR), name="frontend")

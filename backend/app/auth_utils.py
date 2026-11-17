@@ -130,7 +130,7 @@ def get_user_from_request(request: Request, db: Session) -> Optional[models.User
         return None
 
     user = db.get(models.User, user_id)          # user delete ho gaya ho to None
-    if user is None or payload.get("tv") != user.token_version:   # logout ke baad purana token bekaar
+    if user is None or user.is_banned or payload.get("tv") != user.token_version:   # delete/ban/logout ke baad token bekaar
         return None
     return user
 
@@ -140,4 +140,11 @@ def get_current_user(request: Request, db: Session = Depends(get_db)) -> models.
     if user is None:
         raise HTTPException(status_code=401, detail="Not logged in. Please log in again.")
     enforce_csrf(request)
+    return user
+
+
+def require_admin(user: models.User = Depends(get_current_user)) -> models.User:
+    """Sirf admin: har admin endpoint par lagta hay. Admin ka haq har request par DB se check hota hay."""
+    if not user.is_admin:
+        raise HTTPException(status_code=403, detail="Admin access required.")
     return user

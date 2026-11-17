@@ -137,7 +137,19 @@ LOGIN_FAIL_LIMIT_PER_ACCOUNT_IP = (5, 900)  # 5 galat password / 15 min / (accou
 LOGIN_FAIL_LIMIT_PER_ACCOUNT = (20, 3600)   # 20 galat password / ghanta / account (kisi bhi IP se)
 RESEND_LIMIT_PER_IP = (5, 3600)
 RESEND_LIMIT_PER_EMAIL = (3, 3600)
+REPORT_LIMIT_PER_USER = (10, 3600)          # 10 reports / ghanta / user (report spam rokne ke liye)
 
 MAX_ADS_PER_HOUR = _env_int("MAX_ADS_PER_HOUR", 5)
 MAX_ADS_PER_DAY = _env_int("MAX_ADS_PER_DAY", 15)
 MAX_ADS_PER_USER = _env_int("MAX_ADS_PER_USER", 100)
+
+# --- Car photos -------------------------------------------------------------
+# Photos backend/uploads/cars/ mai save hoti hain (server unhe /media/... se login ke baad dikhata hay).
+UPLOAD_ROOT = BASE_DIR / "uploads"
+UPLOAD_DIR = UPLOAD_ROOT / "cars"
+UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+
+MAX_IMAGE_BYTES = _env_int("MAX_IMAGE_MB", 5) * 1024 * 1024    # aik photo ki max size
+MAX_IMAGES_PER_AD = _env_int("MAX_IMAGES_PER_AD", 8)
+MAX_IMAGE_PIXELS = 40_000_000                                  # bohot bari (decompression bomb) images reject
+IMAGE_UPLOAD_LIMIT_PER_USER = (60, 3600)                       # 60 photos / ghanta / user

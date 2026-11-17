@@ -71,7 +71,7 @@ if (loginForm) {
                 alert(data.msg);
                 window.location.href = "index.html";
             } else {
-                errorMsg.textContent = extractErrorMessage(data, "Login failed. Please check your credentials.");
+                errorMsg.textContent = extractErrorMessage(data, "Login failed. Please check your username/email or password.");
 
                 // Email verify nahi hui to dobara bhejne ka button
                 if (response.status === 403) {

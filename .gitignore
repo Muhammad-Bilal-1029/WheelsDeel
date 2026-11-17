@@ -12,6 +12,9 @@ __pycache__/
 *.db
 *.sqlite3
 
+# Users ki upload ki hui car photos (git mai nahi jani chahiye)
+uploads/
+
 # Logs / OS / editor
 *.log
 .DS_Store
