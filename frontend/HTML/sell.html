@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Post An Ad - Car Marketplace</title>
+    <!-- Humari select ki hui design theme stylesheet -->
+    <link rel="stylesheet" href="../css/style.css?v=5">
+    <link rel="stylesheet" href="../css/overrides.css?v=1">
+    <link rel="stylesheet" href="../css/ads-features.css?v=1">
+</head>
+<body class="sell-page">
+
+    <!-- Professional Navbar Header -->
+    <nav class="navbar">
+        <div class="brand"><img class="brand-logo" src="../images/wheeldeal-logo.png" alt="WheelDeal"></div>
+        <div class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="my-ads.html">My Ads</a>
+            <a href="#" id="logoutBtn" style="display: none;" onclick="logoutUser(); return false;">Logout</a>
+        </div>
+    </nav>
+
+    <!-- Main Form Section Layer -->
+    <div class="form-wrapper">
+        <div class="form-container">
+            <h2 id="sell-title">Post Your Car Ad</h2>
+            <p class="subtitle" id="sell-subtitle">Enter correct details and add clear photos to find the best buyers quickly.</p>
+
+            <!-- Error feedback block -->
+            <div id="error-box" class="error-message" style="display: none;" role="alert"></div>
+
+            <form id="sellForm" novalidate>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="brand">Car Brand / Make *</label>
+                        <input type="text" id="brand" maxlength="80" placeholder="e.g., Honda, Toyota, Suzuki" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="model">Car Model *</label>
+                        <input type="text" id="model" maxlength="80" placeholder="e.g., Civic, Corolla, Alto" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="year">Model Year *</label>
+                        <input type="number" id="year" min="1980" max="2027" placeholder="e.g., 2024" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="price">Price (PKR) *</label>
+                        <input type="number" id="price" min="1" max="1000000000" placeholder="e.g., 2500000" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="city">City *</label>
+                        <input type="text" id="city" maxlength="60" placeholder="e.g., Lahore" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="mileage">Mileage (km) *</label>
+                        <input type="number" id="mileage" min="0" max="2000000" placeholder="e.g., 45000 (0 for new)" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="fuel_type">Fuel Type *</label>
+                        <select id="fuel_type" required>
+                            <option value="">Select...</option>
+                            <option value="petrol">Petrol</option>
+                            <option value="diesel">Diesel</option>
+                            <option value="hybrid">Hybrid</option>
+                            <option value="electric">Electric</option>
+                            <option value="cng">CNG</option>
+                            <option value="lpg">LPG</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="transmission">Transmission *</label>
+                        <select id="transmission" required>
+                            <option value="">Select...</option>
+                            <option value="manual">Manual</option>
+                            <option value="automatic">Automatic</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="condition">Condition *</label>
+                        <select id="condition" required>
+                            <option value="">Select...</option>
+                            <option value="used">Used</option>
+                            <option value="new">New</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="engine_cc">Engine (cc)</label>
+                        <input type="number" id="engine_cc" min="50" max="10000" placeholder="e.g., 1300 (optional)">
+                    </div>
+                    <div class="form-group">
+                        <label for="color">Color</label>
+                        <input type="text" id="color" maxlength="40" placeholder="e.g., Pearl White (optional)">
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Contact Phone Number *</label>
+                        <input type="tel" id="phone" maxlength="32" pattern="\+?[0-9\s\-()]{7,32}" title="Enter a valid phone number (7-15 digits)" placeholder="e.g., 03001234567" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="description">Description</label>
+                    <textarea id="description" rows="5" maxlength="2000" placeholder="Tell buyers about the car: owners, accidents, service history, extras... (optional)"></textarea>
+                </div>
+
+                <div class="form-group photo-section">
+                    <label for="photos">Photos</label>
+                    <input type="file" id="photos" accept="image/jpeg,image/png,image/webp" multiple>
+                    <p class="field-hint" id="photo-hint">Up to 8 photos. JPEG, PNG or WebP, max 5 MB each. The first photo is the cover.</p>
+                    <div id="existing-photos" class="photo-grid" aria-label="Saved photos"></div>
+                    <div id="new-photos" class="photo-grid" aria-label="New photos to upload"></div>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="btn-submit" id="sell-submit">Submit Vehicle Ad</button>
+            </form>
+
+            <div class="form-footer">
+                <a href="index.html">← Back to Marketplace</a> &nbsp;|&nbsp; <a href="my-ads.html">My Ads</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login check, logout aur navigation app.js mai; form ka kaam sell.js mai -->
+    <script src="../js/app.js"></script>
+    <script src="../js/sell.js"></script>
+</body>
+</html>

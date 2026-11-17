@@ -5,19 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="View WheelDeal marketplace and blog analytics.">
     <title>Analytics - WheelDeal</title>
-    <link rel="stylesheet" href="../css/style.css?v=5">
+    <link rel="stylesheet" href="../css/style.css?v=6">
+    <link rel="stylesheet" href="../css/overrides.css?v=1">
 </head>
 <body>
-    <nav class="navbar">
-        <a class="brand" href="index.html">Wheels<span>Deal</span></a>
-        <div class="nav-links" id="nav-links-container"></div>
-    </nav>
+    <header class="site-header">
+        <div class="header-top">
+            <div class="auth-links" id="auth-links-container"></div>
+        </div>
+        <nav class="navbar">
+            <a class="brand" href="index.html"><img class="brand-logo" src="../images/wheeldeal-logo.png" alt="WheelDeal"></a>
+            <div class="nav-links" id="nav-links-container"></div>
+        </nav>
+    </header>
 
     <main id="analytics-dashboard">
         <section class="services-hero analytics-hero" aria-labelledby="analytics-title">
             <div class="services-hero-content">
-                <p class="section-eyebrow">WHEELDEAL OVERVIEW</p>
-                <h1 id="analytics-title">Marketplace &amp; blog analytics.</h1>
+                <h1 id="analytics-title">Marketplace &amp; Blog Analytics.</h1>
                 <p>See current vehicle listings and a snapshot of the WheelDeal marketplace.</p>
                 <div class="services-hero-actions">
                     <a class="btn-nav" href="#marketplace-heading">Explore analytics</a>
@@ -39,25 +44,25 @@
                 <a class="home-section-link" href="index.html#available-vehicles">Browse listings <span aria-hidden="true">→</span></a>
             </div>
             <div class="analytics-grid">
-                <article class="analytics-card">
+                <article class="analytics-card card-total">
                     <span class="analytics-card-label">Total listings</span>
                     <strong id="analytics-total-listings">—</strong>
                     <span class="analytics-card-note">All vehicles in the marketplace</span>
                 </article>
-                <article class="analytics-card">
+                <article class="analytics-card card-available">
                     <span class="analytics-card-label">Available cars</span>
                     <strong id="analytics-available-cars">—</strong>
                     <span class="analytics-card-note">Currently listed for buyers</span>
                 </article>
-                <article class="analytics-card">
+                <article class="analytics-card card-pending">
                     <span class="analytics-card-label">Pending cars</span>
                     <strong id="analytics-pending-cars">—</strong>
-                    <span class="analytics-card-note">Status tracking is not enabled</span>
+                    <span class="analytics-card-note">Reserved by a buyer, not sold yet</span>
                 </article>
-                <article class="analytics-card">
+                <article class="analytics-card card-sold">
                     <span class="analytics-card-label">Cars sold</span>
                     <strong id="analytics-sold-cars">—</strong>
-                    <span class="analytics-card-note">Sales are not recorded yet</span>
+                    <span class="analytics-card-note">Sold cars are removed from the listings below</span>
                 </article>
             </div>
             <div class="analytics-grid analytics-grid-secondary">

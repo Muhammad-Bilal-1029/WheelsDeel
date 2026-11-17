@@ -16,6 +16,8 @@ INDEX_NAME = "ix_users_username_normalized"
 
 
 def run_migrations(engine) -> None:
+    _migrate_cars(engine)
+
     insp = inspect(engine)
     if not insp.has_table("users"):
         return
@@ -36,9 +38,58 @@ def run_migrations(engine) -> None:
             conn.execute(text("ALTER TABLE users ADD COLUMN username_normalized VARCHAR(160) NULL"))
             logger.warning("Migration: users.username_normalized add hua.")
 
+        if "is_admin" not in columns:
+            conn.execute(text("ALTER TABLE users ADD COLUMN is_admin BOOLEAN NOT NULL DEFAULT 0"))
+            logger.warning("Migration: users.is_admin add hua.")
+
+        if "is_banned" not in columns:
+            conn.execute(text("ALTER TABLE users ADD COLUMN is_banned BOOLEAN NOT NULL DEFAULT 0"))
+            logger.warning("Migration: users.is_banned add hua.")
+
     _backfill_username_normalized(engine)
     _lowercase_emails(engine)
     _ensure_unique_index(engine)
+
+
+def _migrate_cars(engine) -> None:
+    insp = inspect(engine)
+    if not insp.has_table("cars"):
+        return
+    columns = {col["name"] for col in insp.get_columns("cars")}
+    if "status" not in columns:
+        with engine.begin() as conn:
+            # Purani sab ads "available" ban jati hain
+            conn.execute(text("ALTER TABLE cars ADD COLUMN status VARCHAR(16) NOT NULL DEFAULT 'available'"))
+        logger.warning("Migration: cars.status add hua (purani ads 'available' hain).")
+    if "is_hidden" not in columns:
+        with engine.begin() as conn:
+            conn.execute(text("ALTER TABLE cars ADD COLUMN is_hidden BOOLEAN NOT NULL DEFAULT 0"))
+        logger.warning("Migration: cars.is_hidden add hua.")
+
+    # Naye columns (ad ki details + soft delete). Purani ads mai details khali (NULL) rehti hain.
+    new_columns = [
+        ("is_deleted", "BOOLEAN NOT NULL DEFAULT 0"),
+        ("city", "VARCHAR(60) NULL"),
+        ("mileage", "INTEGER NULL"),
+        ("fuel_type", "VARCHAR(16) NULL"),
+        ("transmission", "VARCHAR(16) NULL"),
+        ("engine_cc", "INTEGER NULL"),
+        ("color", "VARCHAR(40) NULL"),
+        ("car_condition", "VARCHAR(16) NULL"),
+        ("description", "TEXT NULL"),
+    ]
+    for name, ddl in new_columns:
+        if name not in columns:
+            with engine.begin() as conn:
+                conn.execute(text(f"ALTER TABLE cars ADD COLUMN {name} {ddl}"))
+            logger.warning("Migration: cars.%s add hua.", name)
+
+    if "city" not in columns:
+        try:
+            with engine.begin() as conn:
+                conn.execute(text("CREATE INDEX ix_cars_city ON cars (city)"))
+        except Exception as exc:
+            logger.warning("Migration: ix_cars_city nahi ban saka: %s", exc)
 
 
 def _backfill_username_normalized(engine) -> None:

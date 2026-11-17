@@ -1,0 +1,278 @@
+/* ==========================================================================
+   WheelDeal - chhote UI overrides
+   Yeh file style.css ke BAAD load hoti hay, is liye yahan likhi cheez style.css par bhari hay.
+   Size/rang badalne hon to sirf neeche ke variables badlo.
+   ========================================================================== */
+:root {
+    --nav-link-size: 20px;           /* Home, Our Services, Contact, Analytics (Sell Car / Admin par asar nahi) */
+    --hero-title-size: 40px;         /* Home page ka "Find the car that moves you." */
+    --header-search-height: 36px;    /* Header wale search box ki height */
+
+    --status-available: var(--accent-color);   /* Home page ke PKR price wala green */
+    --status-pending: #d97706;                 /* Amber orange */
+    --status-sold: #64748B;                    /* Royal blue */
+}
+
+/* ---- Nav links: 20px ---- */
+.nav-links a.nav-main-link {
+    font-size: var(--nav-link-size);
+}
+
+/* ---- Home page hero heading: 40px ---- */
+.home-hero h1 {
+    font-size: var(--hero-title-size);
+}
+
+/* ---- Services / Contact / Analytics ke hero headings: home wale heading ke barabar ----
+   (Find it. Sell it. Drive away happy. / We value your feedback... / Marketplace & Blog Analytics.)
+   Size badalna ho to upar --hero-title-size badlo: chaaron headings ek saath badlenge. */
+.services-hero h1 {
+    font-size: var(--hero-title-size);
+}
+
+/* ---- Contact page: Google Map (quote form ke saath, left side) ---- */
+.quote-map {
+    display: flex;
+    min-height: 360px;
+}
+
+.quote-map iframe {
+    flex: 1;
+    width: 100%;
+    min-height: 360px;
+    border: 0;
+    border-radius: var(--radius);
+    background: #e2e8f0;
+}
+
+/* ---- Header mai search box (rectangular, search icon) ---- */
+.navbar-search {
+    display: flex;
+    flex: 0 1 320px;
+    min-width: 180px;
+    margin: 0;
+}
+
+.navbar-search input {
+    flex: 1;
+    min-width: 0;
+    box-sizing: border-box;
+    height: var(--header-search-height);
+    padding: 0 0.75rem;
+    border: 1px solid var(--border-color);
+    border-right: 0;
+    border-radius: 4px 0 0 4px;
+    background: #fff;
+    color: var(--text-main);
+    font-size: 14px;
+    outline: none;
+}
+
+.navbar-search input:focus {
+    border-color: var(--secondary-color);
+}
+
+.navbar-search button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    width: 42px;
+    height: var(--header-search-height);
+    padding: 0;
+    border: 1px solid var(--primary-color);
+    border-radius: 0 4px 4px 0;
+    background: var(--primary-color);
+    color: #fff;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.navbar-search button:hover,
+.navbar-search button:focus-visible {
+    background: #172554;
+}
+
+.navbar-search button svg {
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+/* Search box ke saath nav links bachi hui jagah lein */
+.navbar-search + .nav-links {
+    flex: 1 1 auto;
+}
+
+@media (min-width: 901px) and (max-width: 1150px) {
+    .navbar-search + .nav-links {
+        flex-basis: 100%;
+    }
+}
+
+@media (max-width: 900px) {
+    .navbar-search {
+        flex: 0 0 auto;
+        width: 100%;
+        max-width: 480px;
+    }
+}
+
+/* ---- Ad ka status: Available / Pending / Sold ke rang ---- */
+.status-text {
+    font-weight: 700;
+}
+
+.status-available {
+    color: var(--status-available);
+}
+
+.status-pending {
+    color: var(--status-pending);
+}
+
+.status-sold {
+    color: var(--status-sold);
+}
+
+
+/* ==========================================================================
+   HEADER LAYOUT (2 rows)  -  overrides.css ke bilkul END mai paste karo
+   Row 1 (upar):   search (center)  +  Login / Logout / Welcome, user!  (right corner)
+   Row 2 (neeche): logo (left)  +  Home, Our Services, Contact, Analytics, My Ads, Admin, Sell Car
+   Size badalni ho to neeche ke 3 variables badlo.
+   ========================================================================== */
+:root {
+    --logo-height: 56px;                  /* logo ki height */
+    --header-row-padding: 0.6rem 0.6rem;  /* dono rows ki padding (upar-neeche / left-right) */
+    --auth-link-size: 16px;               /* Login / Logout / Welcome ka font */
+}
+
+/* Poora header sticky hay (pehle yeh .navbar par tha) */
+.site-header {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background-color: var(--card-bg);
+    border-bottom: 2px solid var(--primary-color);
+    box-shadow: var(--shadow-sm);
+}
+
+/* ---- Row 1: search center, login/logout/welcome right ---- */
+.header-top {
+    display: grid;
+    grid-template-columns: 1fr minmax(220px, 440px) 1fr;
+    align-items: center;
+    padding: var(--header-row-padding);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.header-top .navbar-search {
+    grid-column: 2;
+    flex: none;
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+}
+
+.header-top .auth-links {
+    grid-column: 3;
+    justify-self: end;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem 1.25rem;
+}
+
+.auth-links a {
+    color: var(--text-main);
+    font-weight: 700;
+    font-size: var(--auth-link-size);
+    transition: color 0.2s;
+}
+
+.auth-links a:hover {
+    color: var(--secondary-color);
+    text-decoration: none;
+}
+
+.auth-links .nav-welcome {
+    color: var(--primary-color);
+    font-weight: 700;
+    font-size: var(--auth-link-size);
+    white-space: nowrap;
+}
+
+/* ---- Row 2: logo left, page links next to it ---- */
+.site-header .navbar {
+    position: static;            /* sticky ab .site-header par hay */
+    border-bottom: 0;
+    box-shadow: none;
+    padding: var(--header-row-padding);
+    justify-content: flex-start;
+    gap: 1rem 1.5rem;
+}
+
+.site-header .nav-links {
+    flex: 0 1 auto;
+    justify-content: flex-start;
+}
+
+/* ---- Logo (sab pages par: header wale bhi aur login/signup/sell/admin wale bhi) ---- */
+.navbar .brand {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    line-height: 0;
+}
+
+.brand-logo {
+    display: block;
+    height: var(--logo-height);
+    width: auto;
+    border-radius: 6px;
+    background: #000;            /* logo ki apni black background hay */
+}
+
+.brand-label {
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--primary-color);
+}
+
+@media (min-width: 901px) and (max-width: 1150px) {
+    .site-header .navbar {
+        justify-content: flex-start;
+    }
+
+    .site-header .nav-links {
+        flex-basis: auto;
+        justify-content: flex-start;
+    }
+}
+
+@media (max-width: 900px) {
+    .header-top {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+    }
+
+    .header-top .navbar-search,
+    .header-top .auth-links {
+        grid-column: 1;
+        justify-self: center;
+    }
+
+    .header-top .navbar-search {
+        max-width: 480px;
+    }
+
+    .site-header .nav-links {
+        justify-content: center;
+    }
+}

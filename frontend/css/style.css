@@ -1279,14 +1279,14 @@ a:hover {
 }
 
 .analytics-card-label {
-    color: var(--text-muted);
+    color: #0F172A;
     font-size: 0.92rem;
     font-weight: 700;
 }
 
 .analytics-card strong {
     margin: 0.35rem 0;
-    color: var(--primary-color);
+    color: #0F172A;
     font-size: clamp(1.65rem, 3vw, 2rem);
     font-weight: 900;
     letter-spacing: -0.025em;
@@ -1299,7 +1299,7 @@ a:hover {
 
 .analytics-card-note,
 .analytics-disclaimer {
-    color: var(--text-muted);
+    color: #0e0e0f;
     font-size: 0.82rem;
 }
 
@@ -1324,11 +1324,11 @@ a:hover {
 }
 
 .analytics-table th {
-    background: #f8fafc;
+    background: #e6ebf0;
     color: var(--primary-color);
     font-size: 0.82rem;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    text-transform: flex-start;
 }
 
 .analytics-table td {
